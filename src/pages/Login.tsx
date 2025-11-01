@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { setCookie } from "@/utils/cookies";
 import { useEffect } from "react";
 import { getCookie, clearAllCookies } from "@/utils/cookies";
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function Login() {
   return (
     <div>
       <h1>Login Page</h1>
-      <button onClick={handleLogin}>Login</button>
+      <Button onClick={handleLogin}>Login</Button>
     </div>
   );
 }

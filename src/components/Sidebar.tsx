@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMemo, useState } from "react";
 import { NavLink } from "react-router";
 import { clearAllCookies } from "@/utils/cookies";
+import { Button } from "./ui/button";
 
 type MenuItem = {
   name: string;
@@ -65,7 +66,7 @@ export default function Sidebar() {
           )}
         </div>
       ))}
-      <button onClick={handleLogout}>登出</button>
+      <Button onClick={handleLogout}>登出</Button>
     </aside>
   );
 }
