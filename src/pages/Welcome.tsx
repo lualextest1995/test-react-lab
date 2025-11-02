@@ -1,6 +1,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { getCookie } from "@/utils/cookies";
+import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 export default function Welcome() {
   const { user, login, setPermissions } = useAuth();
@@ -66,5 +68,15 @@ export default function Welcome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 只在首次掛載時執行
 
-  return <div>Welcome {user?.name}</div>;
+  return (
+    <div>
+      Welcome {user?.name}
+      <Button>
+        <Link to="/dashboard/player">去用戶列表</Link>
+      </Button>
+      <Button>
+        <Link to="/dashboard/contest">去競賽管理</Link>
+      </Button>
+    </div>
+  );
 }
