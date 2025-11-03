@@ -1,3 +1,38 @@
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+
 export default function ContestList() {
-  return <div>ContestList</div>;
+  const [note, setNote] = useState("");
+  const [favorite, setFavorite] = useState(false);
+  return (
+    <div>
+      <h1>ContestList</h1>
+      <div className="bg-white rounded-lg p-6 mb-6 shadow space-y-4">
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">
+            页面便签（切换标签后应继续保留）
+          </p>
+          <Input
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="记录一些内容试试看..."
+          />
+          {note && (
+            <p className="mt-2 text-sm text-slate-600">
+              当前字数：{note.length}
+            </p>
+          )}
+        </div>
+
+        <label className="flex items-center gap-2 text-sm text-slate-600">
+          <input
+            type="checkbox"
+            checked={favorite}
+            onChange={(event) => setFavorite(event.target.checked)}
+          />
+          标记为常用页面
+        </label>
+      </div>
+    </div>
+  );
 }
