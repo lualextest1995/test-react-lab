@@ -4,12 +4,30 @@ import AuthContextProvider from "@/contexts/AuthContext.tsx";
 import TabsContextProvider from "./contexts/TabsContext";
 import "./index.css";
 import App from "./App.tsx";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 0,
+      enabled: true,
+      gcTime: Infinity,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthContextProvider>
       <TabsContextProvider>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </TabsContextProvider>
     </AuthContextProvider>
   </StrictMode>

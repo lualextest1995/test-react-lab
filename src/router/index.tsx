@@ -13,6 +13,13 @@ type RouteConfig = {
   component: ComponentType;
   path: string;
   loader?: RouteObject["loader"];
+  /**
+   * TanStack Query 快取前綴
+   * 當頁面關閉時，會清理所有以此前綴開頭的查詢快取
+   * - 字串：清理 queryKey 第一個元素「以此字串開頭」的查詢
+   * - 字串陣列：清理 queryKey 符合「任一前綴開頭」的查詢
+   */
+  queryPrefix?: string | string[];
 };
 
 const ROUTES_NAMES = {
@@ -27,6 +34,7 @@ const routeConfigMap: Record<string, RouteConfig> = {
   [ROUTES_NAMES.DASHBOARD_PLAYER_LIST]: {
     component: lazy(() => import("@/pages/UserManagement/UserList")),
     path: "/dashboard/player",
+    queryPrefix: "player-",
     loader: async () => {
       // Simulate loading data
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -38,22 +46,37 @@ const routeConfigMap: Record<string, RouteConfig> = {
       () => import("@/pages/UserManagement/VerificationRequests")
     ),
     path: "/dashboard/player/verifyApply",
+    queryPrefix: "player-verify-",
   },
   [ROUTES_NAMES.DASHBOARD_CONTEST_LIST]: {
     component: lazy(() => import("@/pages/ContestManagement/ContestList")),
     path: "/dashboard/contest",
+    queryPrefix: "contest-",
   },
   [ROUTES_NAMES.DASHBOARD_CONTEST_DISPUTED_LIST]: {
     component: lazy(() => import("@/pages/ContestManagement/DisputeList")),
     path: "/dashboard/contest/:contest_id/disputed",
+    queryPrefix: "dispute-",
   },
   [ROUTES_NAMES.DASHBOARD_PASSBOOK_TRANSACTION_RECORDS]: {
     component: lazy(
       () => import("@/pages/ReportManagement/TransactionRecords")
     ),
     path: "/dashboard/passbook",
+    queryPrefix: "passbook-",
   },
 };
+
+/**
+ * 根據路由路徑取得對應的查詢前綴
+ * 用於在頁面關閉時清理相關的 TanStack Query 快取
+ */
+export function getQueryPrefixByPath(path: string): string | string[] | undefined {
+  const routeConfig = Object.values(routeConfigMap).find(
+    (config) => config.path === path
+  );
+  return routeConfig?.queryPrefix;
+}
 
 /**
  * 從後端權限資料生成 React Router 路由配置

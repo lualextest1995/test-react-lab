@@ -7,9 +7,10 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTabContext } from "@/hooks/useTabContext";
+import { useTabActions } from "@/hooks/useTabActions";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { X, FileText } from "lucide-react";
+import { X } from "lucide-react";
 import type { Permissions } from "@/contexts/AuthContext";
 import {
   ContextMenu,
@@ -37,15 +38,8 @@ function findRouteNode(path: string, permissions: Permissions) {
 export default function TabBar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    tabs,
-    activeTabId,
-    openTab,
-    closeTab,
-    switchTab,
-    closeOthers,
-    closeAll,
-  } = useTabContext();
+  const { tabs, activeTabId, openTab, switchTab } = useTabContext();
+  const { closeTab, closeOthers, closeAll } = useTabActions();
   const { permissions } = useAuth();
 
   // 監聽 activeTabId 變化，同步路由
@@ -102,36 +96,7 @@ export default function TabBar() {
   const handleCloseTab = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation(); // 防止觸發標籤點擊事件
 
-    const tab = tabs.find((t) => t.id === tabId);
-    if (tab?.closable === false) {
-      return; // 不可關閉的標籤不處理
-    }
-
     closeTab(tabId);
-
-    // 如果關閉後沒有標籤了，導航到首頁
-    if (tabs.length === 1) {
-      navigate("/");
-    }
-    // TabsContext 會自動更新 activeTabId，useEffect 會監聽並同步路由
-  };
-
-  // 關閉其他標籤
-  const handleCloseOthers = (tabId: string) => {
-    closeOthers(tabId);
-
-    // 導航到保留的標籤
-    const tab = tabs.find((t) => t.id === tabId);
-    if (tab) {
-      navigate(tab.path);
-    }
-  };
-
-  // 關閉所有標籤
-  const handleCloseAll = () => {
-    closeAll();
-    // 關閉所有標籤後導航到首頁
-    navigate("/");
   };
 
   // 如果沒有標籤，不顯示 TabBar
@@ -140,7 +105,7 @@ export default function TabBar() {
   }
 
   return (
-    <div className="bg-white border-b border-slate-200 px-4 flex items-center gap-1 h-10 overflow-x-auto">
+    <div className="h-12 md:h-10 bg-muted/50 border-b flex items-center px-2 gap-1 overflow-x-auto touch-pan-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {tabs.map((tab) => {
         const isActive = tab.id === activeTabId;
         const closable = tab.closable !== false; // 默認可關閉
@@ -151,18 +116,29 @@ export default function TabBar() {
               <button
                 onClick={() => handleTabClick(tab.id)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-t-md text-sm transition-colors border-b-2 whitespace-nowrap",
+                  "group relative flex items-center gap-2 px-4 h-9 md:h-7 md:px-3 md:gap-1.5 text-sm md:text-[13px] rounded-md transition-all whitespace-nowrap select-none touch-manipulation",
+                  "active:scale-95",
                   isActive
-                    ? "bg-slate-50 text-slate-900 border-blue-500 font-medium"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border-transparent"
+                    ? "bg-background text-foreground shadow-sm border border-border"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/60"
                 )}
               >
-                <FileText className="w-4 h-4 shrink-0" />
-                <span className="truncate max-w-[120px]">{tab.title}</span>
+                <span className="truncate max-w-[140px]">
+                  {tab.title}
+                </span>
+
                 {closable && (
                   <X
-                    className="w-3.5 h-3.5 flex-shrink-0 hover:bg-slate-200 rounded transition-colors"
                     onClick={(e) => handleCloseTab(e, tab.id)}
+                    className={cn(
+                      "w-4 h-4 md:w-3.5 md:h-3.5 shrink-0 rounded-sm transition-opacity",
+                      "touch-manipulation",
+                      isActive
+                        ? "opacity-70 hover:opacity-100"
+                        : "opacity-0 md:opacity-0 group-hover:opacity-60 hover:opacity-100",
+                      // 手機上活動標籤始終顯示關閉按鈕
+                      isActive && "sm:opacity-70"
+                    )}
                   />
                 )}
               </button>
@@ -170,27 +146,17 @@ export default function TabBar() {
             <ContextMenuContent>
               {closable && (
                 <>
-                  <ContextMenuItem
-                    onClick={() => {
-                      closeTab(tab.id);
-
-                      // 如果關閉後沒有標籤了，導航到首頁
-                      if (tabs.length === 1) {
-                        navigate("/");
-                      }
-                      // TabsContext 會自動更新 activeTabId，useEffect 會監聽並同步路由
-                    }}
-                  >
+                  <ContextMenuItem onClick={() => closeTab(tab.id)}>
                     關閉
                   </ContextMenuItem>
                   <ContextMenuSeparator />
                 </>
               )}
-              <ContextMenuItem onClick={() => handleCloseOthers(tab.id)}>
-                關閉其他標籤
+              <ContextMenuItem onClick={() => closeOthers(tab.id)}>
+                關閉其他
               </ContextMenuItem>
-              <ContextMenuItem onClick={handleCloseAll} variant="destructive">
-                關閉所有標籤
+              <ContextMenuItem onClick={closeAll}>
+                關閉所有
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
