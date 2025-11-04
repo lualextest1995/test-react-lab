@@ -3,9 +3,11 @@ import { useEffect } from "react";
 import { getCookie } from "@/utils/cookies";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function Welcome() {
   const { user, login, setPermissions } = useAuth();
+  const { t } = useTranslation();
 
   const fakeUser = {
     id: "user",
@@ -71,6 +73,7 @@ export default function Welcome() {
   return (
     <div>
       Welcome {user?.name}
+      <h1>{t("hello")}</h1>
       <Button>
         <Link to="/dashboard/player">去用戶列表</Link>
       </Button>

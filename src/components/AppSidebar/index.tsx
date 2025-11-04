@@ -12,8 +12,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { clearAllCookies } from "@/utils/cookies";
+import Header from "./Header";
+import User from "./User";
 
 /**
  * 扁平化選單資料結構 - Linus 式設計：消除樹形遞迴
@@ -58,32 +58,19 @@ function buildMenu(permissions: Permissions): MenuItem[] {
 export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  //   const user = {
-  //     name: "123",
-  //     email: "test@gmail.com",
-  //     avatar: "/avatars/shadcn.jpg",
-  //   };
-
-  const { permissions, logout } = useAuth();
+  const { permissions } = useAuth();
   const menu = useMemo(() => buildMenu(permissions), [permissions]);
 
-  const handleLogout = () => {
-    clearAllCookies();
-    logout();
-  };
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        123
-        {/* <Header /> */}
+        <Header />
       </SidebarHeader>
       <SidebarContent>
         <Menu items={menu} />
       </SidebarContent>
       <SidebarFooter>
-        456
-        {/* <User user={user} /> */}
-        <Button onClick={handleLogout}>登出</Button>
+        <User />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
