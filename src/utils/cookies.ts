@@ -11,10 +11,6 @@ export interface CookieOptions {
   sameSite?: "strict" | "lax" | "none";
 }
 
-// ==========================================
-// 基礎操作 - 直接映射到底層庫
-// ==========================================
-
 export const setCookie = (
   key: string,
   value: string,
@@ -42,10 +38,6 @@ export const clearAllCookies = (): void => {
   const cookies = getAllCookies();
   Object.keys(cookies).forEach((key) => removeCookie(key));
 };
-
-// ==========================================
-// JSON 操作 - 有實質價值的封裝
-// ==========================================
 
 /**
  * 設置 JSON 類型的 cookie
@@ -85,10 +77,6 @@ export const getJsonCookie = <T>(key: string): T | null => {
     return null;
   }
 };
-
-// ==========================================
-// 安全性相關 - 提供合理的預設值
-// ==========================================
 
 /**
  * 設置安全 cookie
