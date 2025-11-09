@@ -3,7 +3,7 @@ import { useLocation, useNavigation, useOutlet } from "react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import Loading from "@/components/Loading";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "../components/AppSidebar";
+import Sidebar from "@/components/Sidebar";
 import TabBar from "@/components/TabBar";
 import { useTabContext } from "@/hooks/useTabContext";
 
@@ -89,7 +89,7 @@ export default function MainLayout() {
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <Sidebar />
       <main className="w-full h-screen flex flex-col">
         <SidebarTrigger />
         <div className="flex-1 overflow-auto">

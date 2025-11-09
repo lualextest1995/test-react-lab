@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCookie } from "@/utils/cookies";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import Alert from "@/utils/alert";
 import { toBase64, fromBase64 } from "@/utils/base64";
 import storage from "@/utils/storage";
+import Form, { type FormConfig, type FormRef } from "@/components/Form";
+import { z } from "zod";
 
 export default function Welcome() {
   const { user, login, setPermissions } = useAuth();
@@ -17,6 +19,252 @@ export default function Welcome() {
   const [storageKey, setStorageKey] = useState("myData");
   const [storageValue, setStorageValue] = useState("");
   const [storedData, setStoredData] = useState<string>("");
+
+  // Form 範例狀態
+  type FormValues = {
+    username: string;
+    password: string;
+    bio: string;
+    birthday: Date | string;
+    vacation?: [Date | string | undefined, Date | string | undefined];
+    appointmentTime: Date | string;
+    eventTimeRange?: [Date | string | undefined, Date | string | undefined];
+    country: string;
+    city: string;
+    hobbies: string[];
+  };
+
+  const formRef = useRef<FormRef<FormValues>>(null);
+  const [formValues, setFormValues] = useState<FormValues>({
+    username: "",
+    password: "",
+    bio: "",
+    birthday: "",
+    vacation: undefined,
+    appointmentTime: "",
+    eventTimeRange: undefined,
+    country: "",
+    city: "",
+    hobbies: [],
+  });
+
+  // Zod 驗證 Schema
+  const formSchema = z.object({
+    username: z.string().min(3, "用戶名至少需要 3 個字元"),
+    password: z.string().min(6, "密碼至少需要 6 個字元"),
+    bio: z.string().min(10, "簡介至少需要 10 個字元"),
+    birthday: z.union([z.string(), z.date()]).refine((val) => val !== "", {
+      message: "請選擇生日",
+    }),
+    vacation: z
+      .tuple([
+        z.union([z.date(), z.string(), z.undefined()]),
+        z.union([z.date(), z.string(), z.undefined()]),
+      ])
+      .optional(),
+    appointmentTime: z.union([z.string(), z.date()]).refine((val) => val !== "", {
+      message: "請選擇預約時間",
+    }),
+    eventTimeRange: z
+      .tuple([
+        z.union([z.date(), z.string(), z.undefined()]),
+        z.union([z.date(), z.string(), z.undefined()]),
+      ])
+      .optional(),
+    country: z.string().min(1, "請選擇國家"),
+    city: z.string().min(1, "請選擇城市"),
+    hobbies: z.array(z.string()).min(1, "至少選擇一個興趣"),
+  });
+
+  const formConfig: FormConfig<FormValues> = {
+    fields: [
+      {
+        type: "text",
+        name: "username",
+        label: "用戶名",
+        placeholder: "請輸入用戶名",
+        helperText: "至少 3 個字元",
+      },
+      {
+        type: "password",
+        name: "password",
+        label: "密碼",
+        placeholder: "請輸入密碼",
+        helperText: "至少 6 個字元",
+      },
+      {
+        type: "textarea",
+        name: "bio",
+        label: "個人簡介",
+        placeholder: "介紹一下自己...",
+        rows: 4,
+        helperText: "至少 10 個字元",
+      },
+      {
+        type: "datepicker",
+        name: "birthday",
+        label: "生日",
+        placeholder: "選擇生日",
+        shortcuts: [
+          {
+            label: "今天",
+            date: new Date(),
+          },
+          {
+            label: "昨天",
+            date: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          },
+        ],
+      },
+      {
+        type: "daterange",
+        name: "vacation",
+        label: "假期區間",
+        placeholder: "選擇假期日期範圍",
+        shortcuts: [
+          {
+            label: "本週",
+            range: {
+              from: new Date(),
+              to: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+          },
+          {
+            label: "本月",
+            range: {
+              from: new Date(),
+              to: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          },
+        ],
+      },
+      {
+        type: "datetime",
+        name: "appointmentTime",
+        label: "預約時間",
+        placeholder: "選擇預約日期和時間",
+        shortcuts: [
+          {
+            label: "現在",
+            dateTime: new Date(),
+          },
+          {
+            label: "明天早上 9:00",
+            dateTime: new Date(
+              new Date(new Date().setDate(new Date().getDate() + 1)).setHours(9, 0, 0, 0)
+            ),
+          },
+        ],
+      },
+      {
+        type: "datetimerange",
+        name: "eventTimeRange",
+        label: "活動時間範圍",
+        placeholder: "選擇活動開始和結束時間",
+        shortcuts: [
+          {
+            label: "今天 9:00-17:00",
+            range: {
+              from: new Date(new Date().setHours(9, 0, 0, 0)),
+              to: new Date(new Date().setHours(17, 0, 0, 0)),
+            },
+          },
+        ],
+      },
+      {
+        type: "select",
+        name: "country",
+        label: "國家",
+        placeholder: "選擇國家",
+        options: [
+          { value: "tw", label: "台灣" },
+          { value: "cn", label: "中國" },
+          { value: "us", label: "美國" },
+          { value: "jp", label: "日本" },
+        ],
+      },
+      {
+        type: "combobox",
+        name: "city",
+        label: "城市",
+        placeholder: "搜尋城市",
+        options: [
+          { value: "taipei", label: "台北" },
+          { value: "taichung", label: "台中" },
+          { value: "tainan", label: "台南" },
+          { value: "kaohsiung", label: "高雄" },
+          { value: "hsinchu", label: "新竹" },
+        ],
+      },
+      {
+        type: "combobox-multiple",
+        name: "hobbies",
+        label: "興趣",
+        placeholder: "選擇你的興趣",
+        maxShownItems: 3,
+        options: [
+          { value: "reading", label: "閱讀" },
+          { value: "music", label: "音樂" },
+          { value: "sports", label: "運動" },
+          { value: "travel", label: "旅遊" },
+          { value: "cooking", label: "烹飪" },
+          { value: "gaming", label: "遊戲" },
+          { value: "photography", label: "攝影" },
+          { value: "coding", label: "程式設計" },
+        ],
+      },
+    ],
+  };
+
+  const handleFormSubmit = (data: FormValues) => {
+    console.log("表單提交:", data);
+    Alert.success("表單提交成功！");
+    Alert.custom(
+      <div className="max-w-md">
+        <div className="font-semibold mb-2">提交的資料:</div>
+        <pre className="text-xs overflow-auto max-h-60 whitespace-pre-wrap wrap-break-word">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>,
+      { duration: 8000 }
+    );
+  };
+
+  const handleFormReset = () => {
+    setFormValues({
+      username: "",
+      password: "",
+      bio: "",
+      birthday: "",
+      vacation: undefined,
+      appointmentTime: "",
+      eventTimeRange: undefined,
+      country: "",
+      city: "",
+      hobbies: [],
+    });
+    Alert.info("表單已重置");
+  };
+
+  const handleFillSampleData = () => {
+    const sampleData: FormValues = {
+      username: "張小明",
+      password: "password123",
+      bio: "我是一個熱愛程式設計和旅遊的開發者，喜歡探索新技術。",
+      birthday: new Date(1990, 0, 1),
+      vacation: [new Date(), new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)],
+      appointmentTime: new Date(new Date().setHours(14, 30, 0, 0)),
+      eventTimeRange: [
+        new Date(new Date().setHours(9, 0, 0, 0)),
+        new Date(new Date().setHours(17, 0, 0, 0)),
+      ],
+      country: "tw",
+      city: "taipei",
+      hobbies: ["coding", "travel", "reading"],
+    };
+    setFormValues(sampleData);
+    Alert.success("已填入範例資料");
+  };
 
   const fakeUser = {
     id: "user",
@@ -658,6 +906,89 @@ export default function Welcome() {
           <Button onClick={examples.customContent} variant="outline">
             顯示自訂訊息
           </Button>
+        </div>
+      </div>
+
+      {/* Form 範例區域 */}
+      <div className="space-y-6 rounded-lg border p-6">
+        <h2 className="text-2xl font-semibold">Form 組件範例</h2>
+
+        {/* 快速操作按鈕 */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium">快速操作</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={handleFillSampleData} variant="outline">
+              填入範例資料
+            </Button>
+            <Button onClick={handleFormReset} variant="secondary">
+              重置表單
+            </Button>
+            <Button
+              onClick={() => {
+                formRef.current?.submit();
+              }}
+            >
+              提交表單
+            </Button>
+          </div>
+        </div>
+
+        {/* 表單 */}
+        <Form
+          ref={formRef}
+          config={formConfig}
+          schema={formSchema}
+          values={formValues}
+          onChange={setFormValues}
+          onSubmit={handleFormSubmit}
+          className="space-y-4"
+        />
+
+        {/* 表單說明 */}
+        <div className="rounded-md bg-muted p-4 text-sm">
+          <h4 className="mb-2 font-semibold">包含的表單類型：</h4>
+          <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+            <li>
+              <strong>text</strong>: 文字輸入欄位 (用戶名)
+            </li>
+            <li>
+              <strong>password</strong>: 密碼輸入欄位 (密碼)
+            </li>
+            <li>
+              <strong>textarea</strong>: 多行文字區域 (個人簡介)
+            </li>
+            <li>
+              <strong>datepicker</strong>: 日期選擇器 (生日)
+            </li>
+            <li>
+              <strong>daterange</strong>: 日期區間選擇器 (假期區間)
+            </li>
+            <li>
+              <strong>datetime</strong>: 日期時間選擇器 (預約時間)
+            </li>
+            <li>
+              <strong>datetimerange</strong>: 日期時間區間選擇器 (活動時間範圍)
+            </li>
+            <li>
+              <strong>select</strong>: 下拉選單 (國家)
+            </li>
+            <li>
+              <strong>combobox</strong>: 可搜尋下拉選單 (城市)
+            </li>
+            <li>
+              <strong>combobox-multiple</strong>: 多選可搜尋下拉選單 (興趣)
+            </li>
+          </ul>
+          <div className="mt-3 pt-3 border-t">
+            <h4 className="mb-2 font-semibold">特性：</h4>
+            <ul className="list-inside list-disc space-y-1 text-muted-foreground">
+              <li>使用 Zod 進行表單驗證</li>
+              <li>即時驗證與錯誤提示</li>
+              <li>支援 TypeScript 類型推斷</li>
+              <li>可透過 ref 控制表單提交</li>
+              <li>統一的配置式表單定義</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
