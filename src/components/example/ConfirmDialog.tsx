@@ -6,6 +6,7 @@ import {
   type DialogControlRef,
 } from "@/hooks/useDialogControl";
 import axios from "axios";
+import { to } from "@/utils/awaitTo";
 
 // 定義 Dialog 需要的 payload 類型
 export interface ConfirmDialogPayload {
@@ -39,16 +40,19 @@ export const ConfirmDialog = forwardRef<DialogControlRef<ConfirmDialogPayload>>(
 
     const fetchUsers = async () => {
       setIsLoading(true);
-      try {
-        const response = await axios.get<User[]>(
-          "https://jsonplaceholder.typicode.com/users"
-        );
-        setUsersData(response.data);
-      } catch (error) {
+
+      const [error, response] = await to(
+        axios.get<User[]>("https://jsonplaceholder.typicode.com/users")
+      );
+
+      if (error) {
         console.error("載入使用者失敗:", error);
-      } finally {
         setIsLoading(false);
+        return;
       }
+
+      setUsersData(response.data);
+      setIsLoading(false);
     };
 
     // 當對話框打開時加載數據
