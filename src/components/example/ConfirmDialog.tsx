@@ -1,11 +1,10 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import AppDialog from "@/components/Dialog";
 import { Button } from "@/components/ui/button";
 import {
   useDialogControl,
   type DialogControlRef,
 } from "@/hooks/useDialogControl";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
 // 定義 Dialog 需要的 payload 類型
@@ -30,35 +29,37 @@ export const ConfirmDialog = forwardRef<DialogControlRef<ConfirmDialogPayload>>(
       ConfirmDialogPayload
     >(ref);
 
-    const queryClient = useQueryClient();
+    const [usersData, setUsersData] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleConfirm = () => {
       console.log("確認操作:", payload);
       setOpen(false);
     };
 
-    function getUsers() {
-      return axios
-        .get<User[]>("https://jsonplaceholder.typicode.com/users")
-        .then((res) => res.data);
-    }
-
-    const {
-      data: usersData,
-      isLoading,
-      refetch,
-    } = useQuery<User[]>({
-      queryKey: [`dispute-users`],
-      queryFn: getUsers,
-      enabled: open, // 只在對話框打開時才加載數據
-    });
-
-    // 當 dialog 關閉時清除查詢數據
-    useEffect(() => {
-      if (!open) {
-        queryClient.removeQueries({ queryKey: [`dispute-users`] });
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.get<User[]>(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        setUsersData(response.data);
+      } catch (error) {
+        console.error("載入使用者失敗:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }, [open, queryClient]);
+    };
+
+    // 當對話框打開時加載數據
+    useEffect(() => {
+      if (open) {
+        fetchUsers();
+      } else {
+        // 關閉時清除數據
+        setUsersData([]);
+      }
+    }, [open]);
 
     return (
       <AppDialog
@@ -95,7 +96,7 @@ export const ConfirmDialog = forwardRef<DialogControlRef<ConfirmDialogPayload>>(
               variant="link"
               size="sm"
               className="mt-2"
-              onClick={() => refetch()}
+              onClick={() => fetchUsers()}
             >
               重新載入使用者
             </Button>
