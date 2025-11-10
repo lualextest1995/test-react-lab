@@ -19,15 +19,18 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { routeConfigMap } from "@/router";
 
 /**
  * 從權限結構中查找路由節點信息
  */
 function findRouteNode(path: string, permissions: Permissions) {
   if (!permissions) return null;
-
   for (const group of permissions) {
-    const page = group.page.find((p) => p.path === path);
+    const page = group.page.find((p) => {
+      const configPath = routeConfigMap[p.path]?.path || p.path;
+      return configPath === path;
+    });
     if (page) {
       return page;
     }
@@ -123,9 +126,7 @@ export default function TabBar() {
                     : "text-muted-foreground hover:text-foreground hover:bg-background/60"
                 )}
               >
-                <span className="truncate max-w-[140px]">
-                  {tab.title}
-                </span>
+                <span className="truncate max-w-[140px]">{tab.title}</span>
 
                 {closable && (
                   <X
@@ -155,9 +156,7 @@ export default function TabBar() {
               <ContextMenuItem onClick={() => closeOthers(tab.id)}>
                 關閉其他
               </ContextMenuItem>
-              <ContextMenuItem onClick={closeAll}>
-                關閉所有
-              </ContextMenuItem>
+              <ContextMenuItem onClick={closeAll}>關閉所有</ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
         );

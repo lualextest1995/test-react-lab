@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import Header from "./Header";
 import User from "./User";
+import { routeConfigMap } from "@/router";
 
 /**
  * 扁平化選單資料結構 - Linus 式設計：消除樹形遞迴
@@ -42,10 +43,15 @@ function buildMenu(permissions: Permissions): MenuItem[] {
 
     // 頁面項目作為第二層
     for (const page of group.page) {
+      // 從 routeConfigMap 取得實際的路由路徑
+      // page.path 作為 key，routeConfig.path 才是實際的路由路徑
+      const routeConfig = routeConfigMap[page.path];
+      const actualPath = routeConfig?.path || page.path;
+
       items.push({
         id: page.path,
         name: page.name,
-        path: page.path,
+        path: actualPath,
         level: 1,
         isGroup: false,
       });

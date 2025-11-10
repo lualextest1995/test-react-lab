@@ -1,69 +1,71 @@
-import { Can } from "@/components/Can";
-import { Button } from "@/components/ui/button";
-import { usePageGrants, useHasGrant } from "@/hooks/usePageGrants";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { useState } from "react";
+import Button from "@/components/Button";
+import { useRef, useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 export default function VerificationRequests() {
-  const queryClient = useQueryClient();
-  const [count, setCount] = useState(0);
-  const grants = usePageGrants();
-  const { list: canList, export: canExport } = useHasGrant(["list", "export"]);
-  const currentPermissionsText = `目前權限: 查看(${canList}), 匯出(${canExport})`;
+  const location = useLocation();
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    age: "",
+  });
+  const isInit = useRef(false);
 
-  function getTodos() {
-    return axios
-      .get("https://jsonplaceholder.typicode.com/posts")
-      .then((res) => res.data);
+  useEffect(() => {
+    if (location.state) {
+      const newForm = {
+        username: location.state.username || "",
+        email: location.state.email || "",
+        age: location.state.age || "",
+      };
+      setForm(newForm);
+      searchHandler(newForm);
+      return;
+    }
+    if (!isInit.current) {
+      searchHandler(form);
+    }
+  }, []);
+
+  function searchHandler(newForm: typeof form) {
+    isInit.current = true;
+    console.log("Form Data:", newForm);
+    // 執行搜尋邏輯...
   }
 
-  function createTodo() {
-    return axios
-      .post("https://jsonplaceholder.typicode.com/posts", {
-        title: "foo",
-        body: "bar",
-        userId: 1,
-      })
-      .then((res) => res.data);
-  }
-
-  const { data, error, isFetching, refetch } = useQuery({
-    queryKey: ["player-verify-todo", count],
-    queryFn: getTodos,
-  });
-
-  const { mutateAsync, isPending } = useMutation({
-    mutationFn: createTodo,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["player-verify-todo"] });
-    },
-    onError: (error) => {
-      console.error("Error creating todo:", error);
-    },
-    onSettled: () => {
-      console.log("Mutation settled");
-    },
-  });
   return (
     <div>
-      Verification Requests
-      <pre>{JSON.stringify(grants, null, 2)}</pre>
-      <div>{currentPermissionsText}</div>
-      <Can grant="list">
-        <Button>查看</Button>
-      </Can>
-      <Can grant="export" fallback={<Button disabled>匯出 (無權限)</Button>}>
-        <Button>匯出</Button>
-      </Can>
-      <Button onClick={() => setCount(count + 1)}>Count: {count}</Button>
-      {isFetching && <div>Loading...</div>}
-      {error && <div>Error fetching data</div>}
-      {data && <p>{data[0].title}</p>}
-      <Button onClick={() => refetch()}>Refetch Data</Button>
-      <Button onClick={() => mutateAsync()} disabled={isPending}>
-        {isPending ? "Creating..." : "Create Todo"}
-      </Button>
+      <h1>VerificationRequests</h1>
+      <div className="bg-white rounded-lg p-6 mb-6 shadow space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Username</label>
+          <input
+            type="text"
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Age</label>
+          <input
+            type="number"
+            value={form.age}
+            onChange={(e) => setForm({ ...form, age: e.target.value })}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+        <Button onClick={() => searchHandler(form)}>Submit</Button>
+      </div>
     </div>
   );
 }

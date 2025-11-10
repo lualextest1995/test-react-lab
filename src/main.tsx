@@ -24,17 +24,15 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthContextProvider>
-        <TabsContextProvider>
-          <QueryClientProvider client={queryClient}>
-            <App />
-            <ReactQueryDevtools initialIsOpen={false} />
-            <Toaster expand />
-          </QueryClientProvider>
-        </TabsContextProvider>
-      </AuthContextProvider>
-    </ThemeProvider>
-  </StrictMode>
+  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <AuthContextProvider>
+      <TabsContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <App />
+          <ReactQueryDevtools initialIsOpen={false} />
+          <Toaster expand />
+        </QueryClientProvider>
+      </TabsContextProvider>
+    </AuthContextProvider>
+  </ThemeProvider>
 );

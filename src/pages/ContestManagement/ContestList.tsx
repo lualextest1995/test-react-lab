@@ -1,7 +1,10 @@
+import Button from "@/components/Button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
 export default function ContestList() {
+  const navigate = useNavigate();
   const [note, setNote] = useState("");
   const [favorite, setFavorite] = useState(false);
   return (
@@ -33,6 +36,32 @@ export default function ContestList() {
           标记为常用页面
         </label>
       </div>
+      <Button
+        onClick={() =>
+          navigate("/dashboard/player/verifyApply", {
+            state: {
+              username: "testuser",
+              email: "testuser@example.com",
+              age: 30,
+            },
+          })
+        }
+      >
+        去認證申請
+      </Button>
+      <Button
+        onClick={() =>
+          navigate("/dashboard/player/verifyApply", {
+            state: {
+              username: "fakeuser",
+              email: "fakeuser@example.com",
+              age: 18,
+            },
+          })
+        }
+      >
+        去認證申請
+      </Button>
     </div>
   );
 }

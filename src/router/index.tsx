@@ -30,7 +30,7 @@ const ROUTES_NAMES = {
   DASHBOARD_PASSBOOK_TRANSACTION_RECORDS: "/dashboard/passbook",
 } as const;
 
-const routeConfigMap: Record<string, RouteConfig> = {
+export const routeConfigMap: Record<string, RouteConfig> = {
   [ROUTES_NAMES.DASHBOARD_PLAYER_LIST]: {
     component: lazy(() => import("@/pages/UserManagement/UserList")),
     path: "/dashboard/player",
@@ -55,7 +55,7 @@ const routeConfigMap: Record<string, RouteConfig> = {
   },
   [ROUTES_NAMES.DASHBOARD_CONTEST_DISPUTED_LIST]: {
     component: lazy(() => import("@/pages/ContestManagement/DisputeList")),
-    path: "/dashboard/contest/:contest_id/disputed",
+    path: "/dashboard/contest/disputed",
     queryPrefix: "dispute-",
   },
   [ROUTES_NAMES.DASHBOARD_PASSBOOK_TRANSACTION_RECORDS]: {
@@ -71,7 +71,9 @@ const routeConfigMap: Record<string, RouteConfig> = {
  * 根據路由路徑取得對應的查詢前綴
  * 用於在頁面關閉時清理相關的 TanStack Query 快取
  */
-export function getQueryPrefixByPath(path: string): string | string[] | undefined {
+export function getQueryPrefixByPath(
+  path: string
+): string | string[] | undefined {
   const routeConfig = Object.values(routeConfigMap).find(
     (config) => config.path === path
   );
