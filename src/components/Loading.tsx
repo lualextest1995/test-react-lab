@@ -25,19 +25,36 @@ export default function Loading({
 }: LoadingProps) {
   if (type === "loader") {
     return (
-      <div
-        className={cn(
-          "fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm",
-          className
-        )}
-      >
-        <div className="rounded-lg border bg-card p-8 shadow-lg">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
-            <p className="text-sm font-medium text-muted-foreground">
-              {text || "載入中..."}
-            </p>
-          </div>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
+        <div className="relative h-32 w-32">
+          {/* 外圈旋轉環 (白色) */}
+          <div
+            className="absolute inset-0 animate-spin rounded-full border-4 border-t-white border-r-white border-b-white/30 border-l-white/30"
+            style={{ animationDuration: "1s" }}
+          ></div>
+          {/* 中圈旋轉環 (反向, 天空藍) */}
+          <div
+            className="absolute inset-4 animate-spin rounded-full border-4 border-t-sky-400 border-r-sky-400 border-b-sky-400/30 border-l-sky-400/30"
+            style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
+          ></div>
+          {/* 內圈旋轉環 (青色) */}
+          <div
+            className="absolute inset-0 animate-spin rounded-full border-4 border-t-blue-500 border-r-blue-500 border-b-blue-500/30 border-l-blue-500/30"
+            style={{ animationDuration: "1s" }}
+          ></div>
+          {/* 中圈旋轉環 (反向) */}
+          <div
+            className="absolute inset-4 animate-spin rounded-full border-4 border-t-sky-400 border-r-sky-400 border-b-sky-400/30 border-l-sky-400/30"
+            style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
+          ></div>
+          {/* 內圈旋轉環 */}
+          <div
+            className="absolute inset-8 animate-spin rounded-full border-4 border-t-cyan-300 border-r-cyan-300 border-b-cyan-300/30 border-l-cyan-300/30"
+            style={{ animationDuration: "0.8s" }}
+          ></div>
+        </div>
+        <div className="mt-8 text-center text-xl font-medium text-white">
+          <span className="animate-pulse">載入中...</span>
         </div>
       </div>
     );
@@ -45,17 +62,26 @@ export default function Loading({
 
   if (type === "router") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
-            <div className="absolute inset-0 animate-ping">
-              <Loader2 className={cn("text-primary/20", sizeClasses[size])} />
-            </div>
-          </div>
-          <p className="text-sm font-medium text-muted-foreground">
-            {text || "頁面跳轉中..."}
-          </p>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-900 bg-opacity-95">
+        <div className="relative h-32 w-32">
+          {/* 外圈旋轉環 */}
+          <div
+            className="absolute inset-0 animate-spin rounded-full border-4 border-t-blue-500 border-r-blue-500 border-b-blue-500/30 border-l-blue-500/30"
+            style={{ animationDuration: "1s" }}
+          ></div>
+          {/* 中圈旋轉環 (反向) */}
+          <div
+            className="absolute inset-4 animate-spin rounded-full border-4 border-t-sky-400 border-r-sky-400 border-b-sky-400/30 border-l-sky-400/30"
+            style={{ animationDuration: "1.5s", animationDirection: "reverse" }}
+          ></div>
+          {/* 內圈旋轉環 */}
+          <div
+            className="absolute inset-8 animate-spin rounded-full border-4 border-t-cyan-300 border-r-cyan-300 border-b-cyan-300/30 border-l-cyan-300/30"
+            style={{ animationDuration: "0.8s" }}
+          ></div>
+        </div>
+        <div className="mt-8 text-center text-xl font-medium text-white">
+          <span className="animate-pulse">載入中...</span>
         </div>
       </div>
     );
@@ -126,7 +152,9 @@ export default function Loading({
   return (
     <div className={cn("flex items-center justify-center p-4", className)}>
       <div className="flex flex-col items-center gap-3">
-        <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
+        <Loader2
+          className={cn("animate-spin text-primary", sizeClasses[size])}
+        />
         {text && (
           <p className="text-sm font-medium text-muted-foreground">{text}</p>
         )}

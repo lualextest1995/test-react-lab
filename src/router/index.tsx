@@ -29,7 +29,7 @@ export const routeConfigMap: Record<string, RouteConfig> = {
     path: "/dashboard/player",
     loader: async () => {
       // Simulate loading data
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
       return {};
     },
   },
